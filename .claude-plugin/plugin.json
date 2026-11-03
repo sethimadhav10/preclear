@@ -1,0 +1,27 @@
+{
+  "name": "preclear",
+  "version": "1.0.0",
+  "description": "Replace lossy /compact with self-curated context: Claude keeps its own working-memory file (workset), gets told at 50%/80% context, and /preclear + /clear reloads exactly what it chose to keep. Inspired by Context Language Models (arXiv:2609.37725).",
+  "author": {
+    "name": "Madhav Sethi",
+    "url": "https://github.com/sethimadhav10"
+  },
+  "homepage": "https://github.com/sethimadhav10/preclear",
+  "repository": "https://github.com/sethimadhav10/preclear",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "context-management",
+    "compaction",
+    "compact",
+    "clear",
+    "context-window",
+    "agent-memory",
+    "context-engineering",
+    "hooks",
+    "skills",
+    "long-running-sessions",
+    "context-language-models"
+  ],
+  "icon": "assets/icon.png"
+}

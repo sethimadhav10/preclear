@@ -1,0 +1,16 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "preclear",
+  "owner": {
+    "name": "Madhav Sethi",
+    "url": "https://github.com/sethimadhav10"
+  },
+  "plugins": [
+    {
+      "name": "preclear",
+      "source": "./",
+      "description": "Self-curated context for Claude Code: a workset file Claude rewrites itself, context-size nudges, and /preclear \u2192 /clear instead of lossy /compact."
+    }
+  ],
+  "description": "preclear: self-curated context for Claude Code instead of lossy /compact"
+}
