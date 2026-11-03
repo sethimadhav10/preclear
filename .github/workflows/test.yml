@@ -1,0 +1,27 @@
+name: tests
+on: [push, pull_request]
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.8", "3.12"]
+        exclude:
+          - os: macos-latest
+            python: "3.8"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest discover tests -v
+      - name: manual install round-trip
+        run: |
+          export CLAUDE_CONFIG_DIR="$RUNNER_TEMP/cfg"
+          ./install.sh
+          python -c "import json,os;s=json.load(open(os.environ['CLAUDE_CONFIG_DIR']+'/settings.json'));assert len(s['hooks'])==5,s"
+          ./install.sh   # idempotent: must not duplicate entries
+          python -c "import json,os;s=json.load(open(os.environ['CLAUDE_CONFIG_DIR']+'/settings.json'));assert all(len(v)==1 for v in s['hooks'].values()),s"
+          ./uninstall.sh
+          python -c "import json,os;s=json.load(open(os.environ['CLAUDE_CONFIG_DIR']+'/settings.json'));assert not s.get('hooks'),s"
