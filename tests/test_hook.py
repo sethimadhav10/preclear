@@ -3,7 +3,7 @@
 Each test feeds the hook the same JSON Claude Code sends on stdin, in a throwaway WORKSET_DIR,
 and checks what comes back. Standard library only:  python3 -m unittest discover tests -v
 """
-import json, os, subprocess, sys, tempfile, unittest
+import json, os, shutil, subprocess, sys, tempfile, unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HOOK = os.path.join(ROOT, "hooks", "workset.py")
@@ -64,17 +64,29 @@ class Hook(unittest.TestCase):
         self.assertIn("s1.jsonl", out)          # points at the pre-compact transcript
 
     def test_clear_carries_workset_to_new_session_id(self):
-        # /clear gives a new session_id inside the same Claude process. Fake that process with a
-        # python binary whose argv[0] is literally "claude", so the hook's ancestor walk finds it.
-        fake = os.path.join(self.tmp.name, "claude")
-        os.symlink(sys.executable, fake)
-        via = [fake, "-c", "import subprocess,sys; sys.exit(subprocess.run([sys.argv[1], sys.argv[2]]).returncode)",
-               sys.executable, HOOK]
-        self.run_hook({"hook_event_name": "SessionStart", "session_id": "old", "source": "startup",
-                       "transcript_path": self.transcript("old", 1000)}, via=via)
-        self.workset("old", "# Next\nNONCE-c1ea")
-        out = self.run_hook({"hook_event_name": "SessionStart", "session_id": "new", "source": "clear"}, via=via)
-        self.assertIsNotNone(out, "hook did not recognise the fake claude process")
+        # /clear gives a new session_id inside the SAME Claude process. Fake that process: one
+        # long-lived bash started under the name "claude" (exec -a) runs the hook for both events,
+        # the way Claude Code does. (A python symlink won't do: macOS framework Python re-execs
+        # and loses argv[0]; a copied /bin/bash gets killed by macOS.)
+        p1, p2 = (os.path.join(self.tmp.name, f"p{i}.json") for i in (1, 2))
+        o1, o2 = (os.path.join(self.tmp.name, f"o{i}.txt") for i in (1, 2))
+        put(p1, json.dumps({"hook_event_name": "SessionStart", "session_id": "old", "source": "startup",
+                            "transcript_path": self.transcript("old", 1000)}))
+        put(p2, json.dumps({"hook_event_name": "SessionStart", "session_id": "new", "source": "clear"}))
+        inner = ('"$0" "$1" < "$2" > "$3"; printf "# Next\\nNONCE-c1ea" > "$4"; '
+                 '"$0" "$1" < "$5" > "$6"; echo $$')
+        bash = shutil.which("bash") or "/bin/bash"
+        r = subprocess.run([bash, "-c", 'exec -a claude "$0" -c "$@"', bash, inner, sys.executable, HOOK,
+                            p1, o1, os.path.join(self.dir, "old.md"), p2, o2],
+                           capture_output=True, text=True, env=self.env, timeout=30)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        fake_pid = r.stdout.strip()
+        # Key the check on the FAKE's pid, so a real Claude Code ancestor (when the tests run
+        # inside a Claude session) can't make this pass by accident.
+        self.assertEqual(os.listdir(os.path.join(self.dir, ".pid")), [fake_pid],
+                         "hook did not map the session to the fake claude process")
+        with open(o2) as f:
+            out = json.loads(f.read())["hookSpecificOutput"]["additionalContext"]
         self.assertIn("NONCE-c1ea", out)
         self.assertIn("old.jsonl", out)
         self.assertTrue(os.path.exists(os.path.join(self.dir, "old.md")), "old workset must be copied, not moved")
