@@ -10,7 +10,6 @@ it as the work goes. When the context window fills, you type `/preclear` and the
 fresh window starts from exactly what Claude chose to keep. No harness-written summary, and nothing
 to copy and paste.
 
-[![tests](https://github.com/sethimadhav10/preclear/actions/workflows/test.yml/badge.svg)](https://github.com/sethimadhav10/preclear/actions/workflows/test.yml)
 ![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-d97757)
 ![python](https://img.shields.io/badge/python-3.8%2B%2C%20stdlib%20only-3776ab)
 ![license](https://img.shields.io/badge/license-MIT-green)
@@ -123,7 +122,7 @@ Then open a **new** session. It should say `Workset file for this session: …`.
 land at the right place. The default is 200K. The hook switches to 1M by itself once a session goes
 past 200K, but by then the early nudges have already fired.
 
-Requires `python3` (3.8+). Tested on macOS; Linux should work (CI runs both); Windows is untested.
+Requires `python3` (3.8+). Tested on macOS. Linux should work but is not yet tested; Windows is untested.
 
 ## Use
 
