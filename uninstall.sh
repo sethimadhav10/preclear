@@ -13,7 +13,7 @@ for ev in list(h):
 json.dump(s, open(p, "w"), indent=2)
 PY
 rm -f "$C/hooks/workset.py"
-for s in workset preclear precompact; do
+for s in workset preclear postclear precompact; do
   if [ -f "$C/skills/$s/.preclear" ]; then rm -rf "$C/skills/$s"; fi
 done
 echo "✔ uninstalled (worksets kept in $C/workset/)"

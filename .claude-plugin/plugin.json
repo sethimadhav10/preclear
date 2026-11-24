@@ -1,6 +1,6 @@
 {
   "name": "preclear",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Replace lossy /compact with self-curated context: Claude keeps its own working-memory file (workset), gets told at 50%/80% context, and /preclear + /clear reloads exactly what it chose to keep. Inspired by Context Language Models (arXiv:2609.37725).",
   "author": {
     "name": "Madhav Sethi",

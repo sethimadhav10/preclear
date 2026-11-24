@@ -10,7 +10,7 @@ mkdir -p "$C/hooks" "$C/skills" "$C/workset/.pid"
 BK="$C/settings.json.bak-preclear-$(date +%Y%m%d-%H%M%S)"
 cp -p "$C/settings.json" "$BK"
 cp "$SRC/hooks/workset.py" "$C/hooks/workset.py"; chmod +x "$C/hooks/workset.py"
-for s in workset preclear precompact; do
+for s in workset preclear postclear precompact; do
   if [ -e "$C/skills/$s" ] && [ ! -f "$C/skills/$s/.preclear" ]; then
     echo "skip skill $s: $C/skills/$s already exists and isn't ours"; continue
   fi

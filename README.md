@@ -71,8 +71,9 @@ sequenceDiagram
 - **One hook** (`hooks/workset.py`, Python standard library only) on `SessionStart`,
   `UserPromptSubmit`, `PostToolUse`, `PreCompact` and `PostCompact`. It must be fast and silent, and
   it always exits 0. It writes only inside `~/.claude/workset/`.
-- **Three skills.** `workset` (keep the file), `preclear` (make it complete before `/clear`) and
-  `precompact` (write a paste-back prompt for a *different* session or a teammate).
+- **Four skills.** `workset` (keep the file), `preclear` (make it complete before `/clear`),
+  `postclear` (after the clear: "where were we?" as a short brief) and `precompact` (write a
+  paste-back prompt for a *different* session or a teammate).
 - If auto-compact fires anyway, the hook re-injects the workset after it, and **the workset beats
   the summary** wherever they disagree.
 - `/preclear` also prints a **resume link**: a one-click script that opens a fresh window in the
@@ -104,7 +105,8 @@ without a tag reads as verified, and a fresh window can't tell the difference.
 /plugin install preclear@preclear
 ```
 
-Plugin skills are namespaced: `/preclear:preclear`, `/preclear:workset`, `/preclear:precompact`.
+Plugin skills are namespaced: `/preclear:preclear`, `/preclear:postclear`, `/preclear:workset`,
+`/preclear:precompact`.
 Claude also invokes them on its own when the hook nudges it.
 
 **Manual install** (plain `/preclear`, no plugin system):
@@ -131,6 +133,7 @@ Requires `python3` (3.8+). CI runs the tests and an install/uninstall round-trip
 2. When it's long, or Claude says the workset is current: type **`/preclear`**.
 3. Claude finishes the file, re-reads it cold, and prints the resume link.
 4. Type **`/clear`**. The fresh window starts with the workset and the path to the old transcript.
+5. Type **`/postclear`** for a short brief: what it was doing, where it stands, what's next.
 
 ## Settings
 
@@ -172,10 +175,18 @@ hooks/workset.py                  the hook (stdlib Python)
 skills/workset/SKILL.md           keep the file current
 skills/preclear/SKILL.md          get ready for /clear
 skills/preclear/resume_link.py    one-click resume link
+skills/postclear/SKILL.md         "where were we?" brief after the clear
 skills/precompact/SKILL.md        paste-back handover for another session
 install.sh / uninstall.sh         manual install without the plugin system
 tests/test_hook.py                end-to-end tests
 ```
+
+## Companion
+
+**[unattended](https://github.com/sethimadhav10/unattended)**: five skills for work that has to be
+right when nobody is watching: a six-agent autonomous loop with sealed acceptance criteria, rules
+against checks that pass while looking at the wrong thing, a deploy audit, a data prospector and a
+one-decision status brief.
 
 ## Credit
 
